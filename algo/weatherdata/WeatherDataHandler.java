@@ -66,9 +66,9 @@ public class WeatherDataHandler {
 	 */
 	public List<String> averageTemperatures(LocalDate dateFrom, LocalDate dateTo) {
 		int firstIndex = findFirstIndexByDate(dateFrom, 0, weather.size()-1 , (weather.size() / 2)); // O(log n)
-		int lastIndex = findLastIndexByDate(dateTo, 0, weather.size()-1, (weather.size() + firstIndex )/2); // O(log k) k = range of n
+		int lastIndex = findLastIndexByDate(dateTo, 0, weather.size()-1, (weather.size() + firstIndex )/2); // O(log m) m = range of n from firstIndex to end
 		
-		List<String> result = new ArrayList<String>(); //O(n)
+		List<String> result = new LinkedList<String>(); //O(1)
 		try {
 			
 			TreeMap<LocalDate, List<Float>> rangeList = getRangeWeatherList(firstIndex, lastIndex); //O(k) -> k = range within weather array
@@ -103,11 +103,11 @@ public class WeatherDataHandler {
 				LocalDate date = weather.get(i).date; //O(1)
 				float temp = weather.get(i).airTemp; //O(1)
 				
-				if (rangeList.containsKey(date)) { //O(1)
-					rangeList.get(date).add(temp); //O(1)
+				if (rangeList.containsKey(date)) { //O(log n)
+					rangeList.get(date).add(temp); //O(log n)
 				} else {
-					rangeList.put(date, new ArrayList<Float>()); //O(1)
-					rangeList.get(date).add(temp); //O(1)
+					rangeList.put(date, new ArrayList<Float>()); //O(log n)
+					rangeList.get(date).add(temp); //O(log n)
 				}
 			}
 		} catch (IndexOutOfBoundsException e) { //O(1)
@@ -198,13 +198,13 @@ public class WeatherDataHandler {
 	 */
 	public List<String> missingValues(LocalDate dateFrom, LocalDate dateTo) {
 		int startIndex = findFirstIndexByDate(dateFrom, 0, weather.size() - 1, weather.size() / 2); //O(log n)
-		int endIndex = findLastIndexByDate(dateTo, startIndex, weather.size()-1, (startIndex + weather.size()) / 2); //O(log k) k = range of n
+		int endIndex = findLastIndexByDate(dateTo, startIndex, weather.size()-1, (startIndex + weather.size()) / 2); //O(log m) m = range of n from startIndex -> end
 		
 		TreeMap<LocalDate, List<Float>> days = getRangeWeatherList(startIndex, endIndex); //O(k) k = range in weather collection
 
-		ArrayList<String> result = new ArrayList<>(); //O(1)
+		LinkedList<String> result = new LinkedList<>(); //O(1)
 		
-		for (Map.Entry<LocalDate, List<Float>> entry : days.entrySet()) { //O(n) n = total dates (inclusive) in TreeMap days
+		for (Map.Entry<LocalDate, List<Float>> entry : days.entrySet()) { //O(m) m = total dates (inclusive) in TreeMap days
 			result.add(entry.getKey().toString() + " missing " + (24 - entry.getValue().size()) + " values"); // O(1)
 		}
 	
@@ -222,9 +222,9 @@ public class WeatherDataHandler {
 	public List<String> approvedValues(LocalDate dateFrom, LocalDate dateTo) {
 		int totalRecords = 0, approvedRecords = 0; // O(1)
 		int startIndex = findFirstIndexByDate(dateFrom, 0, weather.size()-1, weather.size()/2); //O(log n)
-		int endIndex = findLastIndexByDate(dateTo, startIndex, weather.size() -1,( weather.size() + startIndex) / 2); //O(log k) k = range of n 
+		int endIndex = findLastIndexByDate(dateTo, startIndex, weather.size() -1,( weather.size() + startIndex) / 2); //O(log m) m = range of n from startIndex -> end
 		
-		List<String> result = new ArrayList<String>(1); //O(1)
+		List<String> result = new LinkedList<String>(); //O(1)
 		for (int i = startIndex; i <= endIndex; i++) { //O(k) k = range in weather collection
 			if (weather.get(i).approved) { // O(1)
 				approvedRecords++; //O(1)
